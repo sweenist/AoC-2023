@@ -2,6 +2,7 @@
 inputdata/
 sandbox.pm
 .vstags
+*.perltemplate
 
 # Template cruft
 !Build/
