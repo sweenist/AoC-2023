@@ -70,3 +70,37 @@ Can you see the problem? If you said, "You're missing an equals sign after @EXPO
 Anyway...
 
  </details>
+
+
+<details>
+  <summary>Day 2</summary>
+
+This game of "show me cubes" doesn't sound very fun...
+
+<h3>Things I learned</h3>
+
+* `le` keyword doesn't behave the same as `<=`
+
+When checking each game set for the number of colored cubes, my validator method only returned a handful of valid games if and only if, a set had a valid value for each color. Predefining as 0 and comparing using `le` returned `falsy` (eg `return 0 le 13` ). It's possible that `<=` is explicitly for numbers and will respect `0` values. `le` is a string comparison operator after checking the internet
+
+* returning chained boolean statements
+
+a statement like this: 
+
+```perl
+return $set_red <= $max_red and $set_green <= $max_green and $set_blue <= $max_blue;
+```
+doesn't behave like I expected. But this works:
+
+```perl
+return ($set_red <= $max_red and $set_green <= $max_green and $set_blue <= $max_blue);
+```
+If I had to guess, the former statement only returns the first part of the expression `$set_red <= $max_red`
+
+* control flow with `next`
+
+I'm used to a keyword like `continue` for processing the next enumeration in a loop. Perl uses `next`. I like this in combination with `unless`. It's succinct:
+```perl
+next unless validate($blah);
+```
+</details>

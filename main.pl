@@ -9,7 +9,8 @@ use Modules::Orchestrator qw(solve);
 
 my ($day, $part) = @ARGV;
 usage("No args specified") unless(defined $day and defined $part);
-usage() unless($part eq 1 or $part eq 2);
+usage("part can only be 1 or 2") unless($part eq 1 or $part eq 2);
+usage("Choose a day between 1 and 25") unless($day ge 1 and $day le 25);
 
 my $inputfile = "./inputdata/day$day.txt";
 my $output;

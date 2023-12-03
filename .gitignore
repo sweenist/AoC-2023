@@ -1,6 +1,6 @@
 # dev stuff
 inputdata/
-sandbox.pm
+sandbox.pl
 .vstags
 *.perltemplate
 

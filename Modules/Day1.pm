@@ -17,7 +17,6 @@ my %number_strings = (
 	'zero'  => 0
 );
 
-my $totalCalibration = 0;
 my %reverse_number_strings = ();
 
 foreach(keys %number_strings) {
@@ -34,6 +33,7 @@ my $re_last = qr/$reverse_pattern/;
 
 sub part_one {
 	my ($file) = @_;
+	my $totalCalibration = 0;
 
 	while(my $line = <$file>) {
 		my $calibration;
