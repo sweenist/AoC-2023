@@ -104,3 +104,33 @@ I'm used to a keyword like `continue` for processing the next enumeration in a l
 next unless validate($blah);
 ```
 </details>
+
+
+<details>
+  <summary>Day 3</summary>
+
+Reminds me of the "oil field" interview problem.
+
+I thought on this a bit (part 1). I think if we get the absolute indicies of the symbols and then go back through and see if the symbol index exists in the surround array of positions around the number, this would be a good idea. There may be a better way but this is what my brain came up with.
+
+\* by `absolute` I mean, the index of a symbol found if the whole data set was one string. Since each line in my data was 140 characters long, the 3rd character in the 4th row would be index 422 => row_index(3) * line_length(140) + symbol_index(2) (0-based indexing for row and symbol)
+
+<h3>Things I learned</h3>
+
+ * Getting length of array
+
+  I discovered that you can get the length of a perl array by assigning a scalar ($variable) to the list (@variable). Super neat? I leave that to you to decide.
+
+  ```perl
+  my $array_len = @blah_array;
+  ```
+
+ * Array index variables
+
+  When you using the regex match operation (ie `$blah =~ /m/<regex_pattern>/`), upon finding a match, there are some special perl variables available. `$-[0]` gets the index of the first matched character of the match in a string. `$+[0]` gets the starting of the charcter after a match. I just subtract 1 from the `$+[0]` scalar to get the last index of my match.   
+
+  * chomp - remove trailing space
+
+  In languages like c#, `.Trim()` functions return the new value. Not so with `chomp`. It does an in place mutation trimming the input separator character (new line, essentially). `chomp` does return a value: the number of characters it removed from the variable in question.
+
+</details>
