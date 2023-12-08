@@ -133,4 +133,38 @@ I thought on this a bit (part 1). I think if we get the absolute indicies of the
 
   In languages like c#, `.Trim()` functions return the new value. Not so with `chomp`. It does an in place mutation trimming the input separator character (new line, essentially). `chomp` does return a value: the number of characters it removed from the variable in question.
 
+  * hashes of array references, oh my
+
+  To talk through my approach to solving the part two problem, I wanted to get the absolute data indices of all gears (`*`). Effectively, when I matched the asterisk character in string, I'd use that index as my hash key and set it to an array reference.
+
+  ```perl
+  my $gear_index = $-[0] + (LINE_LENGTH * $row_number);
+	$gears{$gear_index} = []; # [] is an array ref; () is an undefined array. Can't push to () via hash index
+  ```
+  Then, I churned back through the data to match surrounding indices to any available gear index. If a matching gear existed, then push the number to the hash at corresponding gear index key.
+
+  Straightforward, right? I then used `List::AllUtils` `product` function to give me the product of each hash array value with exactly two numbers. The problem: the product was being applied to the array reference (which didn't do anything because 1 x address reference = address reference). WHat gives?
+
+  well, you can't just do this:
+
+  ```perl
+  for(keys %gears) {
+    my @nums = $gears{$_}; # <-- array ref eg ARRAY5987651
+
+    #if length of array is 2 -- scalar @array returns length...
+    if(scalar @nums == 2) { # this would never be true
+      my $product = product @nums;
+      $aggregate += $product;
+    }
+	}
+  ```
+
+  Instead, do this:
+
+  ```perl
+  my @nums = @{$gears{$_}} # oh baby, cast that arrayref to an array!
+  ```
+
+In short... I've spend more time so far working in spite of perl and its nuances than on the algorithm for solving these problems.
+
 </details>
