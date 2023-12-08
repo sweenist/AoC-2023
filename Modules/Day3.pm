@@ -9,7 +9,6 @@ our @EXPORT_OK = qw( part_one part_two );
 #---------------------------------------------------------------------------
 
 use List::AllUtils qw( product );
-use feature qw( say );
 use constant LINE_LENGTH => 140;
 
 

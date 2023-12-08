@@ -168,3 +168,20 @@ I thought on this a bit (part 1). I think if we get the absolute indicies of the
 In short... I've spend more time so far working in spite of perl and its nuances than on the algorithm for solving these problems.
 
 </details>
+
+<details>
+<summary>Day 4</summary>
+
+The only real oddity is when splitting strings. Not a big deal separating winning numbers from the ones that were owned except the `|` had to be escaped -> `\|`. Then splitting numbers by space took a moment because I would get a blank item in my list as evidenced by a preceding comma when I do:
+
+```perl
+say join ',', @winning_numbers;
+
+# output ,4,8,15,16,23,42
+```
+
+adding a `trim` function to the input fixed that. Also, the split expression required `/\s+/`.
+
+Otherwise, the fastest I've completed a pair of problems.
+
+</details>

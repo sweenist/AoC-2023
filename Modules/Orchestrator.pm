@@ -9,8 +9,8 @@ our @EXPORT_OK = qw( solve );
 use Modules::Day1;
 use Modules::Day2;
 use Modules::Day3;
+use Modules::Day4;
 
-# use Modules::Day4;
 # use Modules::Day5;
 # use Modules::Day6;
 # use Modules::Day7;
