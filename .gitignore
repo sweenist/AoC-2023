@@ -3,6 +3,7 @@ inputdata/
 sandbox.pl
 .vstags
 *.perltemplate
+scratch.txt
 
 # Template cruft
 !Build/

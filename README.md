@@ -185,3 +185,63 @@ adding a `trim` function to the input fixed that. Also, the split expression req
 Otherwise, the fastest I've completed a pair of problems.
 
 </details>
+
+<details>
+<summary>Day 5</summary>
+
+<h3>References strike again</h3>
+
+* The problem with hash references
+
+In solving the seed-soil...location problem for part 1, I decided to be clever and define a bunch of hashes and when I encounter a specific string (ie `humidity-to-location`) I'd use and eval statement to dynamically store the reference and pass it on to a subrountine so I could cascade the source/destination values.
+
+   * **problem 1** - assigning a new hash to the reference creates a new hash with different reference
+
+  I don't even recall what I did but it seemed that this code created a new hash reference so any key-value pairs added are lost to the ether
+
+  ```perl
+  sub cascade_recipe() {
+    my $recipe_ref = shift;
+    my $data = shift;
+    my %hash = %$recipe_ref;
+    ...
+    $hash{$key} = $value;
+  ```
+
+  when printing my variable, the reference was different for the `%hash` but the `$recipe_ref` had the appropriate hash for the thing I wanted from the caller.
+
+  * **problem 2** - try using a prototype
+
+  args to a subroutine are a list of scalars effective. For lists and hashes those are references but a hash is just a fancy list that has keys and values so the whole thing gets stored as a list (according to the internet). I though there was a problem getting the hash to resolve correctly. So I used a prototype.
+
+  ```perl
+  sub cascade_recipe(\%) {
+    my $recipe_ref = shift;
+    my $data = shift;
+    my %hash = %$recipe_ref;
+    ...
+    $hash{$key} = $value;
+  ```
+
+  That `\%` in the rountine parens means the first arg in `@_` (the arg list) shall be a hash reference. But using this didn't do anything. Back to stackoverflow for some different word combinations.
+
+  * **The solution** 
+
+  There are two ways to access a hash. either `$hash{key}` or `$hash->{key}`. The latter dereferences and since we're using a reference, the arrow is the way to amend the hash ref you care about. No need to use a prototype either.
+
+  ```perl
+  sub cascade_recipe() {
+    my $recipe_ref = shift;
+    my $data = shift;
+    ...
+    $recipe_ref->{$key} = $value;
+  ```
+
+<h3>This implementation begs for monads</h3>
+I'd love to dot chain my hashes. I can probably still do it...
+
+<h3>Example works but my data input kills perl</h3>
+
+Let's see what happens on a different machine...
+
+</details>
