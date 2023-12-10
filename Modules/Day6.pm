@@ -6,7 +6,6 @@ use Exporter qw( import );
 our @ISA = qw( Exporter );
 our @EXPORT_OK = qw( part_one part_two );
 
-use feature qw(say);
 use String::Util qw( trim );
 use POSIX;
 
@@ -38,7 +37,6 @@ sub part_two {
 	$time = get_kern_values($time);
 	$distance = get_kern_values($distance);
 
-	say "t: $time; d: $distance";
 	my $tolerance_count = quadrify($time, $distance);
 	return $tolerance_count;
 }
