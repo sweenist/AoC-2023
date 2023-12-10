@@ -245,3 +245,14 @@ I'd love to dot chain my hashes. I can probably still do it...
 Let's see what happens on a different machine...
 
 </details>
+
+<details>
+<summary>Day 6</summary>
+
+This was an interesting application of the quadratic equation (or, at least that's how I approached it).
+turns out, `ceil()` and `floor()` are not exactly included. You have to `use POSIX` to get these functions.
+
+Also, to raise a number by a power, use `**`, not `^`. The caret is used to XOR binary expressions or for bitwise operations. 
+
+I was afraid of buffer overflow in part two b ut it was fine.
+</details>
