@@ -4,6 +4,7 @@ sandbox.pl
 .vstags
 *.perltemplate
 scratch.txt
+.vscode
 
 # Template cruft
 !Build/

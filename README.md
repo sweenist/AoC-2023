@@ -3,6 +3,7 @@ Advent of Code 2023... in perl!
 
 ## Journal
 
+The following entries are discoveries I made while using Perl to crack Advent of Code 2023 problems. Not all entries have spoilers. More often than not, the language syntax itself was the time sink than concocting the approach to solving the problem per day. Though, some of these problems were doozies. Some prompts be [like](https://youtu.be/7sl0e9yKwTk?si=03yJq0UBiphQ7Zkx). 
 
 <details>
   <summary>Day 1</summary>
@@ -255,4 +256,55 @@ turns out, `ceil()` and `floor()` are not exactly included. You have to `use POS
 Also, to raise a number by a power, use `**`, not `^`. The caret is used to XOR binary expressions or for bitwise operations. 
 
 I was afraid of buffer overflow in part two b ut it was fine.
+</details>
+
+<details>
+  <summary>Day 7</summary>
+
+<h3>Threading</h3>
+Had a thought about threading. I'm looking at this problem in two slices:
+  * Identify the strength types into their own buckets (five of a kind, full house, etc)
+  * sort each of the buckets accordingly (this is the part I want to thread)
+
+[Threading](https://perldoc.perl.org/threads) in perl feels a little daunting but maybe because it looks a little different than in C# or Javascript. It should be fine if I pass the sub buckets as array references. 
+
+<h3>sorting optimizations</h3>
+Thinking about the sorting of hands... I got curious about the efficiency differences between numeric and string comparisons in perl. Luckily, [someone else already did this research](https://limited.systems/articles/writing-faster-perl/#:~:text=Integer%20comparison%20is%20faster%20than%20string%20comparison).
+
+How can I take 13 possible values and make them sort efficient? 2-9 are already numbers. A,K,Q,J and T are valued at 14..10. 
+As I was bringing the dogs back from a walk, I had a mind to convert each character to a hex value 0x2 - 0xE. Seems a bit heavy because 57.1428% of my characters are numerical to begin with. Since 1 isn't a value and regex is efficient, I can swap the alpha character with their numerical value. Then I would do a thing like `/1\d|\d/` to fetch appropriate values for sorting.
+
+<h3>multi initialization</h3>
+
+I didn't want 7 lines to declare a bunch of empty arrays... though, I wouldn't do this in c#... anyway, here's a nifty (or whatever) thing to assign a bunch of empty, yet unique, array ~references~ (edit: don't use references, just make them empty arrays (`()` instead of `[]`), otherwise, conacatenating at the end is a nightmare. You'll get 7 array references and then their contents. lame):
+
+```perl
+my (@fivek, @fourk, @fh, @threek, @twop, @onep, @def) = () x 7;
+```
+`x` is a repetition operator. you just have to be able to count how many things you're declaring, which makes two modifications you need to make if you add or remove an array initialization.
+
+<h3>given... the perl switch statement</h3>
+
+There's a switch like syntax as follows:
+
+```perl
+given($some_var) {
+  when('foo') { do blah; }
+  default { do other blah; }
+}
+```
+
+but... it doesn't work out of the box. One must use:
+
+```perl
+use feature qw ( switch );
+```
+
+of all things...
+
+<h2>Part Two</h2>
+_what fresh hell is this?_
+
+My previous implementation paints me into a bit of a corner
+
 </details>
