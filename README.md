@@ -303,8 +303,41 @@ use feature qw ( switch );
 of all things...
 
 <h2>Part Two</h2>
-_what fresh hell is this?_
+Ah, so J is no longer 11 and it's less than two... and since letters were previous assigned 1x (10-14), I'll make J a really low number: 0!
 
-My previous implementation paints me into a bit of a corner
+The only real snafu I ran into was that implemnented `given...when...default` wrongly for my case where only single versions of each non-joker card existed. I pleaced the default outside an inner given and it did weird things. I had a handful of high card weights where 1 or more jokers were present
+
+```perl
+given($max_card_appearance) {
+  ...
+  when(1) {
+    given($key_count) {
+      when(1) { push @{$fivek}, $hand; }
+      when(2) { push @{$fourk}, $hand; }
+      when(3) { push @{$threek}, $hand; }
+      when(4) { push @{$onep}, $hand; }
+    }
+    default	{ push @{$def}, $hand; } #oopsie. weird side effect. None of the above evaluated
+  }
+}
+```
+
+Once I corrected to the snippet below, everything was as expected. The `default` case, I suspect, was being evaluated before attempting the inner given loop:
+
+```perl
+given($max_card_appearance) {
+  when(1) {
+    given($key_count) {
+      when(1) { push @{$fivek}, $hand; }
+      when(2) { push @{$fourk}, $hand; }
+      when(3) { push @{$threek}, $hand; }
+      when(4) { push @{$onep}, $hand; }
+      default	{ push @{$def}, $hand; }
+    }
+  }
+}
+```
+
+Now that that is over, I have an idea how to make perl not commit sepuku when I run Day 5 solution.
 
 </details>
