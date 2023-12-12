@@ -245,6 +245,10 @@ I'd love to dot chain my hashes. I can probably still do it...
 
 Let's see what happens on a different machine...
 
+<h3>Take what you need</h3>
+
+The approach above was pretty heavy handed. There's no need to store all the possible destination-source values. I changed the approach to only cache each recipe and let each seed be it's own input. to get the next component and interate. I often solve the via iteration. Anyway, part 1 works. Part 2 dies with "Out of Memory".
+
 </details>
 
 <details>
