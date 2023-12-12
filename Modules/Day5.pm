@@ -12,6 +12,7 @@ our @EXPORT_OK = qw( part_one part_two );
 use String::Util qw( trim );
 use List::AllUtils qw (min);
 use Modules::Constants qw (TRUE FALSE);
+use POSIX;
 
 use feature qw( say );
 use bigint;
@@ -58,35 +59,21 @@ sub part_one {
 		}
 		if($start_new) {
 			$start_new = FALSE;
-			say "Processing header: $line";
 			$recipe = process_header($line);
 			eval "\$recipe_ref = \\%$recipe;";
 			next;
 		}
-		cascade_recipe(\%$recipe_ref, $line);
+		store_recipe(\%$recipe_ref, $line);
 	}
 
 	for(@seeds) {
-		$seed_soil{$_} = $_ unless exists $seed_soil{$_};
-		my $soil = $seed_soil{$_};
-
-		$soil_fertilizer{$soil} = $soil unless exists $soil_fertilizer{$soil};
-		my $fertilizer = $soil_fertilizer{$soil};
-
-		$fertilizer_water{$fertilizer} = $fertilizer unless exists $fertilizer_water{$fertilizer};
-		my $water = $fertilizer_water{$fertilizer};
-
-		$water_light{$water} = $water unless exists $water_light{$water};
-		my $light = $water_light{$water};
-
-		$light_temperature{$light} = $light unless exists $light_temperature{$light};
-		my $temperature = $light_temperature{$light};
-
-		$temperature_humidity{$temperature} = $temperature unless exists $temperature_humidity{$temperature};
-		my $humidity = $temperature_humidity{$temperature};
-
-		$humidity_location{$humidity} = $humidity unless exists $humidity_location{$humidity};
-		my $location = $humidity_location{$humidity};
+		my $soil = sift($_, \%seed_soil, "soil");
+		my $fertilizer = sift($soil, \%soil_fertilizer, "fert");
+		my $water = sift($fertilizer, \%fertilizer_water, "water");
+		my $light = sift($water, \%water_light, "light");
+		my $temperature = sift($light, \%light_temperature, "temp");
+		my $humidity = sift($temperature, \%temperature_humidity, "humid");
+		my $location = sift($humidity, \%humidity_location, "loc");
 
 		push @locations, $location;
 	}
@@ -100,7 +87,54 @@ sub part_one {
 sub part_two {
 	my ($file) = @_;
 
-	return "not implemented";
+	my $start_new = FALSE;
+	my $recipe;
+	my $recipe_ref;
+
+	my @seeds;
+	my @locations = [];
+
+	my %seed_soil;
+	my %soil_fertilizer;
+	my %fertilizer_water;
+	my %water_light;
+	my %light_temperature;
+	my %temperature_humidity;
+	my %humidity_location;
+
+	while(my $line = <$file>) {
+		chomp($line);
+
+		if(not @seeds){
+			@seeds = get_seed_ranges($line);
+			next;
+		}
+		if(not $line) {
+			$start_new = TRUE;
+			next;
+		}
+		if($start_new) {
+			$start_new = FALSE;
+			$recipe = process_header($line);
+			eval "\$recipe_ref = \\%$recipe;";
+			next;
+		}
+		store_recipe(\%$recipe_ref, $line);
+	}
+
+	for(@seeds) {
+		my $soil = sift($_, \%seed_soil, "soil");
+		my $fertilizer = sift($soil, \%soil_fertilizer, "fert");
+		my $water = sift($fertilizer, \%fertilizer_water, "water");
+		my $light = sift($water, \%water_light, "light");
+		my $temperature = sift($light, \%light_temperature, "temp");
+		my $humidity = sift($temperature, \%temperature_humidity, "humid");
+		my $location = sift($humidity, \%humidity_location, "loc");
+
+		push @locations, $location;
+	}
+	my $return_value = min @locations;
+	return "$return_value";
 }
 
 #---------------------------------------------------------------------------
@@ -128,18 +162,122 @@ sub get_seeds {
 }
 
 
-sub cascade_recipe() {
+sub get_seed_ranges {
+	my ($line) = @_;
+	my $numbers = (split /:/, $line)[1];
+	my @s = split /\s+/, trim($numbers);
+	my $pairs = @s;
+	$pairs = ($pairs / 2) - 1;
+
+	my @return_list = ();
+
+	for(0..$pairs) {
+		my $i = $_ * 2;
+		my $j = $i + 1;
+		my $base = $s[$i];
+		my $range = $s[$j];
+		my $top = $base + $range - 1;
+
+		push @return_list, ($base..$top);
+	}
+	return @return_list;
+}
+
+
+sub store_recipe() {
 	my $recipe_ref = shift;
 	my $data = shift;
-	my %hash = %$recipe_ref;
 	my($destination, $source, $range) = split /\s+/, trim($data);
 
-	while($range) {
-		$range--;
-		my $key = $source + $range;
-		my $value = $destination + $range;
-		$recipe_ref->{$key} = $value;
+	my $key = $source;
+	my $value = $destination;
+	$recipe_ref->{$key} = [$value, $range];
+}
+
+
+sub sift() {
+	my $item_number = shift;
+	my $hash_ref = shift;
+	my $debug = shift;
+
+	my @hash_keys = sort {$a <=> $b } keys %{$hash_ref};
+	my $candidate = get_match_or_lower($item_number, \@hash_keys, $debug);
+
+	if ($candidate == -1) {
+
+		# add target as key with range 0
+		$hash_ref->{$item_number} = [$item_number, 0];
+		$candidate = $item_number;
 	}
+	my $next_and_range = $hash_ref->{$candidate};
+
+	# say "sift $debug: $item_number -> candidate: $candidate; Dest base: ".$next_and_range->[0]." range: ".$next_and_range->[1];
+	my $augment = get_destination_increment($item_number, $candidate, $next_and_range->[1]);
+
+	# say " sift $debug: augment by: $augment";
+	if ($augment == -1) {
+
+		# add target as key with range 0
+		$hash_ref->{$item_number} = [$item_number, 0];
+		return $item_number;
+	}
+	my $result = $next_and_range->[0] + $augment;
+	return $result;
+}
+
+#Binary search
+sub get_match_or_lower() {
+	my $target = shift;
+	my $v = shift;
+	my $debug = shift;
+
+	my @values = @{$v};
+	my $values_length = @values;
+
+	return -1 if $target <= $values[0];
+	return $values[$values_length - 1] if $target >= $values[$values_length - 1];
+
+	my $i = 0;
+	my $j = $values_length;
+	my $mid = 0;
+
+	while($i < $j) {
+		$mid = ($i + $j) / 2;
+		$mid = int($mid);
+
+		# say "matching $debug";
+		# say "\ti: $i, j: $j, mid: $mid; values:".join(',', @values);
+		# say "\t$target -> ".$values[$mid];
+		return $values[$mid] if $values[$mid] == $target;
+
+		if($target < $values[$mid]) {
+			if($mid > 0 && $target > $values[$mid - 1])	{
+				return $values[$mid -1];
+			}
+			$j = $mid;
+		} else {
+			if( $mid < ($values_length - 1) && $target < $values[$mid + 1]) {
+				return $values[$mid];
+			}
+
+			$i = ($mid + 1);
+		}
+	}
+
+	return $values[$mid];
+}
+
+
+sub get_destination_increment() {
+	my $target = shift;
+	my $base = shift;
+	my $range = shift;
+
+	my $difference = $target - $base;
+	if($difference > $range) {
+		return -1;
+	}
+	return $difference;
 }
 
 1;
