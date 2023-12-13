@@ -92,7 +92,6 @@ sub part_two {
 	my $recipe_ref;
 
 	my @seeds;
-	my @locations = [];
 
 	my %seed_soil;
 	my %soil_fertilizer;
@@ -122,19 +121,29 @@ sub part_two {
 		store_recipe(\%$recipe_ref, $line);
 	}
 
-	for(@seeds) {
-		my $soil = sift($_, \%seed_soil, "soil");
-		my $fertilizer = sift($soil, \%soil_fertilizer, "fert");
-		my $water = sift($fertilizer, \%fertilizer_water, "water");
-		my $light = sift($water, \%water_light, "light");
-		my $temperature = sift($light, \%light_temperature, "temp");
-		my $humidity = sift($temperature, \%temperature_humidity, "humid");
-		my $location = sift($humidity, \%humidity_location, "loc");
+	my $lowest_location = 0;
 
-		push @locations, $location;
+	while(@seeds) {
+
+		say "checking next $count of $current_seed";
+		while($count) {
+
+			my $soil = sift($current_seed, \%seed_soil, "soil");
+			my $fertilizer = sift($soil, \%soil_fertilizer, "fert");
+			my $water = sift($fertilizer, \%fertilizer_water, "water");
+			my $light = sift($water, \%water_light, "light");
+			my $temperature = sift($light, \%light_temperature, "temp");
+			my $humidity = sift($temperature, \%temperature_humidity, "humid");
+			my $location = sift($humidity, \%humidity_location, "loc");
+
+			$lowest_location = get_min($location, $lowest_location);
+
+			$count--;
+			$current_seed++;
+		}
 	}
-	my $return_value = min @locations;
-	return "$return_value";
+
+	return $lowest_location;
 }
 
 #---------------------------------------------------------------------------
@@ -164,23 +173,15 @@ sub get_seeds {
 
 sub get_seed_ranges {
 	my ($line) = @_;
-	my $numbers = (split /:/, $line)[1];
-	my @s = split /\s+/, trim($numbers);
-	my $pairs = @s;
-	$pairs = ($pairs / 2) - 1;
+	my $numbers = trim((split /:/, $line)[1]);
+	my @return_array;
 
-	my @return_list = ();
-
-	for(0..$pairs) {
-		my $i = $_ * 2;
-		my $j = $i + 1;
-		my $base = $s[$i];
-		my $range = $s[$j];
-		my $top = $base + $range - 1;
-
-		push @return_list, ($base..$top);
+	while($numbers =~ m/(\d+)\s(\d+)/g) {
+		my $upper = $1 + $2 -1;
+		push @return_array, [$1, $upper];
 	}
-	return @return_list;
+
+	return @return_array;
 }
 
 
@@ -217,12 +218,21 @@ sub sift() {
 	# say " sift $debug: augment by: $augment";
 	if ($augment == -1) {
 
-		# add target as key with range 0
-		$hash_ref->{$item_number} = [$item_number, 0];
 		return $item_number;
 	}
 	my $result = $next_and_range->[0] + $augment;
 	return $result;
+}
+
+
+sub overlay() {
+	my $seed_ref = shift;
+	my $hash_ref = shift;
+
+	my @hash_keys = sort { $a <=> $b } keys %{$hash_ref};
+	my $destination_lower = get_match_or_lower(@{$seed_ref}->[0], \@hash_keys, "2");
+
+	#somehow we're gonna overlay the shards
 }
 
 #Binary search
@@ -278,6 +288,15 @@ sub get_destination_increment() {
 		return -1;
 	}
 	return $difference;
+}
+
+
+sub get_min() {
+	my $left = shift;
+	my $right = shift;
+
+	return $left if $right == 0;
+	return min($left, $right);
 }
 
 1;
