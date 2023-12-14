@@ -345,3 +345,47 @@ given($max_card_appearance) {
 Now that that is over, I have an idea how to make perl not commit sepuku when I run Day 5 solution.
 
 </details>
+
+<details>
+  <summary>Day 8</summary>
+
+  Part 1 was easy. Part 2 was going to take 8 billion seconds. Ain't no one got time for that.
+
+  With the help of friends doing the challenge, a juicy hint about LCM (Lowest Common Multiple) was dropped and I was a bit confused at first. I assumed getting from `/A$/` to `/Z$/` had many paths with many lengths. A simple test proved that each path run multiple times aggregates to the same base factor. I just had to trust the data.
+
+  Built my own LCM utility, tested it out and felt pretty good about it. Then my answer in the hundreds of quadrillions was "too high".
+
+  I could only specultae an off by one error. Boy, was I right!
+
+  My part 1 solution looked a bit like this:
+
+  ```perl
+  while($current_key ne $end_key) {
+		my $index = $steps % $direction_length;
+		my $dir_index = $ref_directions->[$index];
+
+		my $next_key = $locations{$current_key}[$dir_index];
+		$current_key = $next_key;
+
+		$steps++;
+	}
+  ```
+
+  part two, I kept some things, moved other things around...
+
+  ```perl
+  while(1) {
+		$steps++;
+    my $index = $steps % $direction_length;
+		my $dir_index = $ref_dir->[$index];
+
+		my $next_key = $locations{$key}[$dir_index];
+		$key = $next_key;
+		return $steps if $key =~ m/Z$/;
+	}
+  ```
+
+  I do not recall what bright idea led me to moving the `$steps++` to the top of the loop, but I depend on the modulo of that over the length of my directions to use the correct R/L. Moving `$steps++` below `my $index = $steps % $direction_length;` fixes it. 
+
+  This one wasn't so bad. Getting away from brute force solutions and thinking about the data differently is making be a better human.
+</details>
