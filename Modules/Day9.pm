@@ -7,7 +7,7 @@ use Exporter qw( import );
 our @ISA = qw( Exporter );
 our @EXPORT_OK = qw( part_one part_two );
 
-use List::AllUtils qw( pairwise all max );
+use List::AllUtils qw( pairwise all max min );
 use Modules::Utils qw ( get_upper_bound );
 use Modules::Constants qw (TRUE FALSE);
 use feature qw ( say );
@@ -35,9 +35,19 @@ sub part_one {
 
 
 sub part_two {
-	my ($file) = @_;
 
-	return "not implemented";
+	my ($file) = @_;
+	my $aggregate = 0;
+
+	while(my $line = <$file>) {
+		chomp($line);
+		my @oasis_report_base = split /\s+/, $line;
+		my $report_bundle_ref = reduce_working_set(\@oasis_report_base);
+		my $augend = increase_working_set($report_bundle_ref, TRUE);
+		$aggregate += $augend;
+	}
+
+	return $aggregate;
 }
 
 #---------------------------------------------------------------------------
@@ -67,19 +77,27 @@ sub reduce_working_set() {
 
 sub increase_working_set() {
 	my $hash_ref = shift;
-	my %working_sets = %{$hash_ref};
-	my @keys = sort { $b <=> $a } keys %working_sets;
+	my $should_prepend = shift;
 
-	for(1..scalar(@keys)-1) {
+	my %working_sets = %{$hash_ref};
+	my @keys = sort {$a <=> $b } keys %working_sets;
+	my @order = defined $should_prepend ? reverse (1..scalar(@keys)-1) : (1..scalar(@keys)-1);
+
+	for(@order) {
 		my $left_ref = $working_sets{$_ - 1};
 		my $right_ref = $working_sets{$_};
 
-		my $end = $$left_ref[-1] + $$right_ref[-1];
-		push @$right_ref, $end;
+		if($should_prepend) {
+			my $beginning =  $$left_ref[0] - $$right_ref[0];
+			unshift @$left_ref, $beginning;
+		}else {
+			my $end = $$left_ref[-1] + $$right_ref[-1];
+			push @$right_ref, $end;
+		}
 	}
-
-	my $max_key = max(keys %working_sets);
-	return @{$working_sets{$max_key}}[-1];
+	my $index = defined $should_prepend ? 0 : -1;
+	my $return_key = defined $should_prepend ? min(keys %working_sets) : max(keys %working_sets);
+	return @{$working_sets{$return_key}}[$index];
 }
 1;
 
