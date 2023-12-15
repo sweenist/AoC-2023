@@ -389,3 +389,96 @@ Now that that is over, I have an idea how to make perl not commit sepuku when I 
 
   This one wasn't so bad. Getting away from brute force solutions and thinking about the data differently is making be a better human.
 </details>
+
+<details>
+  <summary>Day 9</summary>
+
+Alright... it seems that the time has now come for me to leave a note to myself about how reference and value types in perl work. I'm running into dereferencing issues again when I pass an array on to a sub routine. I'm sure hashes will give me guff, too.
+
+_Example 1:_ Pushing an array reference to a subroutine, dereferencing and pushing into a hash
+
+I want to maintain a bunch of lists in a hash. Maybe I could get by with a mulridimensional array but I want this to work... dammit!
+
+```perl
+sub test {
+	my $line = "10 13 16 21 30 45";
+
+	my @data = split /\s+/, $line;
+	my %hash = example(\@data);
+}
+
+
+sub example() {
+	my $input_list = shift;
+	my %working_sets = {0 => @$input_list};
+	my $set_index = 0;
+	my @working_set = $working_sets{$set_index};
+...
+}
+```
+
+this gives me a `Odd number of elements in anonymous hash` on line 2 of the `example` sub. 
+
+**solution**
+use parens, not curly braces when initializing a hash. Also, the array in the hash needs to be an array ref. 
+
+This:
+
+```perl 
+	my %working_sets = {0 => @$input_list}; #curly braces { } X wrong
+```
+
+should be 
+
+```perl
+	my %working_sets = (0 => $input_list); #parens ( ) correct. use an arrayref
+```
+
+<h3>Array references</h3>
+I can't quite figure it out. I suspect that something like this creates an array, eg (1,2,3)
+
+```perl
+my @blah = split /\s/ "1 2 3";
+```
+
+so when it gets passed on to a function like so:
+
+```perl
+some_func(\@blah);
+```
+It remains a ref essentially (I think). I say this because passing the dereference version of this array causes problems in my utility function.
+
+<h3>Dereferencing Array refs in hashes... more malarkey</h3>
+I spent too much time trying to figure out what's going on with trying to slice arrays. Spoiler alert: you can't slice array references.
+
+When dereferencing from a hash, one much do this:
+
+```perl
+	my %working_sets = (0 => $input_list);
+	my $set_index = 0;
+	my @values = @{$working_sets{$set_index}};
+```
+
+fffffff... I know I made the choice to use this language. This is not the first time that the bulk of the time solving the day's problem came down to "how do I use perl?"
+
+<h3>Special syntax for getting the last item in an array</h3>
+
+Get the last item by simply doing `$array[-1];`.
+
+What about array references? Super easy:
+prepend another `$` sigil to the front of the array ref like so:
+
+```perl
+$$arr_ref[-1];
+```
+
+Wanna really impress your friends? There's a special variable for last index!
+
+```perl
+$array[$#array]
+# for array refs prepend an extra $ sigil. for the index token, a $ after $#
+$$arr_ref[$#$arr_ref];
+```
+
+Wanna keep your friends? Don't use perl...
+</details>

@@ -4,7 +4,7 @@ use warnings;
 
 use Exporter qw( import );
 our @ISA = qw( Exporter );
-our @EXPORT_OK = qw( lcm );
+our @EXPORT_OK = qw( lcm get_upper_bound );
 
 use List::AllUtils qw( product any uniq );
 use feature qw( say );
@@ -55,4 +55,16 @@ sub next_prime() {
 
 #---------------------------------------------------------------------------
 
+
+sub get_upper_bound {
+	my $array_ref = shift;
+	my $debug = shift;
+
+	my $array_length = @{$array_ref};
+	if($debug) {
+		say "Array ref $array_ref";
+		say "array length = $array_length";
+	}
+	return $array_length - 1;
+}
 1;
