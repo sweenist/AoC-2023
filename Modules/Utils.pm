@@ -4,7 +4,7 @@ use warnings;
 
 use Exporter qw( import );
 our @ISA = qw( Exporter );
-our @EXPORT_OK = qw( lcm get_upper_bound );
+our @EXPORT_OK = qw( lcm get_upper_bound intersect );
 
 use List::AllUtils qw( product any uniq );
 use feature qw( say );
@@ -67,4 +67,20 @@ sub get_upper_bound {
 	}
 	return $array_length - 1;
 }
+
+#---------------------------------------------------------------------------
+
+
+sub intersect {
+	my $array_ref1 = shift;
+	my $array_ref2 = shift;
+
+	my @first = @$array_ref1;
+	my @second = @$array_ref2;
+	my %intersect;
+
+	++$intersect{$_} for @first;
+	return grep {--$intersect{$_} >= 0} @second;
+}
+
 1;

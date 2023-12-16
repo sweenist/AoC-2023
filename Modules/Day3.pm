@@ -10,6 +10,7 @@ our @EXPORT_OK = qw( part_one part_two );
 
 use List::AllUtils qw( product );
 use constant LINE_LENGTH => 140;
+use Modules::Utils qw ( intersect);
 
 
 sub part_one {
@@ -39,7 +40,7 @@ sub part_one {
 			my $last_index = $+[0]-1 + (LINE_LENGTH * $row_number);
 
 			my @perimeter = get_surrounding_number_indices($first_index, $last_index);
-			my $is_valid_engine = has_intersection(\@perimeter, \@symbol_indices);
+			my $is_valid_engine = intersect(\@perimeter, \@symbol_indices);
 
 			if ($is_valid_engine) {
 				$aggregate += $1;
@@ -105,23 +106,12 @@ sub get_surrounding_number_indices(){
 }
 
 
-sub has_intersection {
-	my ($a, $b) = @_;
-	my @first = @$a;
-	my @second = @$b;
-	my %intersect;
-
-	++$intersect{$_} for @first;
-	return grep {--$intersect{$_} >= 0} @second;
-}
-
-
 sub connect_gear {
 	my ($a, $b, $value) = @_;
 	my @indices = @$a;
 	my %g = %$b;
 	my @gear_indices = keys %g;
-	my @matches = has_intersection($a, \@gear_indices);
+	my @matches = intersect($a, \@gear_indices);
 
 	for(@matches){
 		push @{ $g{$_}}, $value;
