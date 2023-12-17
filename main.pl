@@ -32,11 +32,12 @@ sub usage {
 	say $message unless not defined $message;
 	say "" unless not defined $message;
 	say "Advent of Code main.pl usage:";
-	say "\tperl main.pl <number:day> <number:part>";
+	say "\tperl main.pl <number:day> <number:part> <bool:benchmarking>";
 	say "";
-	say "For eaxample: perl main.pl 1 2 would run day1 part_two routine";
+	say "For eaxample: `perl main.pl 1 2` would run day1 part_two routine";
 	say "    day: a number in range 1..25";
 	say "    part: either 1 or 2";
+	say "    benchmarking: any non-zero value";
 	die;
 }
 
