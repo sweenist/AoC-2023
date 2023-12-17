@@ -118,32 +118,19 @@ sub part_two {
 			eval "\$recipe_ref = \\%$recipe;";
 			next;
 		}
-		store_recipe(\%$recipe_ref, $line);
+		store_recipe(\%$recipe_ref, $line, TRUE);
 	}
 
-	my $lowest_location = 0;
+	my @soils = process_maps(\@seeds, \%seed_soil, "soil");
+	my @ferts = process_maps(\@soils, \%soil_fertilizer, "fertilizer");
+	my @water = process_maps(\@ferts, \%fertilizer_water, "water");
+	my @light = process_maps(\@water, \%water_light, "light");
+	my @temp = process_maps(\@light, \%light_temperature, "temperature");
+	my @humid = process_maps(\@temp, \%temperature_humidity, "humidity");
+	my @locations = process_maps(\@humid, \%humidity_location, "location");
 
-	while(@seeds) {
-
-		say "checking next $count of $current_seed";
-		while($count) {
-
-			my $soil = sift($current_seed, \%seed_soil, "soil");
-			my $fertilizer = sift($soil, \%soil_fertilizer, "fert");
-			my $water = sift($fertilizer, \%fertilizer_water, "water");
-			my $light = sift($water, \%water_light, "light");
-			my $temperature = sift($light, \%light_temperature, "temp");
-			my $humidity = sift($temperature, \%temperature_humidity, "humid");
-			my $location = sift($humidity, \%humidity_location, "loc");
-
-			$lowest_location = get_min($location, $lowest_location);
-
-			$count--;
-			$current_seed++;
-		}
-	}
-
-	return $lowest_location;
+	my @flat_locations = sort ( map {@$_} @locations);
+	return min @flat_locations;
 }
 
 #---------------------------------------------------------------------------
@@ -165,14 +152,14 @@ sub process_header() {
 
 
 sub get_seeds {
-	my ($line) = @_;
+	my ($line) = shift;
 	my $numbers = (split /:/, $line)[1];
 	return split /\s+/, trim($numbers);
 }
 
 
 sub get_seed_ranges {
-	my ($line) = @_;
+	my ($line) = shift;
 	my $numbers = trim((split /:/, $line)[1]);
 	my @return_array;
 
@@ -188,11 +175,11 @@ sub get_seed_ranges {
 sub store_recipe() {
 	my $recipe_ref = shift;
 	my $data = shift;
+	my $use_upper_bound = shift;
 	my($destination, $source, $range) = split /\s+/, trim($data);
 
-	my $key = $source;
-	my $value = $destination;
-	$recipe_ref->{$key} = [$value, $range];
+	my $value = defined $use_upper_bound ? $destination + $range - 1 : $range;
+	$recipe_ref->{$source} = [$destination, $value];
 }
 
 
@@ -212,10 +199,8 @@ sub sift() {
 	}
 	my $next_and_range = $hash_ref->{$candidate};
 
-	# say "sift $debug: $item_number -> candidate: $candidate; Dest base: ".$next_and_range->[0]." range: ".$next_and_range->[1];
 	my $augment = get_destination_increment($item_number, $candidate, $next_and_range->[1]);
 
-	# say " sift $debug: augment by: $augment";
 	if ($augment == -1) {
 
 		return $item_number;
@@ -225,27 +210,98 @@ sub sift() {
 }
 
 
-sub overlay() {
-	my $seed_ref = shift;
-	my $hash_ref = shift;
+sub process_maps() {
+	my $input_ref = shift; # multi-dimensional array
+	my $hash_ref = shift;  # hash of {source}->[destination_start, destination_end]
+	my $debug = shift;
+	my @source_keys = sort { $a <=> $b } keys %{$hash_ref};
+	my @return_segments;
+	say "---$debug---" if defined $debug;
 
-	my @hash_keys = sort { $a <=> $b } keys %{$hash_ref};
-	my $destination_lower = get_match_or_lower(@{$seed_ref}->[0], \@hash_keys, "2");
+	for(@$input_ref) {
 
-	#somehow we're gonna overlay the shards
+		# print Dumper $_;
+		my $map_low_index = get_match_or_lower($_->[0], \@source_keys, 1);
+		my $map_hi_index = get_match_or_lower($_->[1], \@source_keys, 1);
+
+		# say "inputs:\t (".$_->[0].", ".$_->[1].")";
+		my $start = $_->[0];
+		my $end = $_->[1];
+		my $is_sifting = TRUE;
+		$map_low_index = 0 if $map_low_index == -1;
+
+		while($is_sifting) {
+			my $source_start = $source_keys[$map_low_index];
+			my $dest = $hash_ref->{$source_start};
+			my $range = $dest->[1] - $dest->[0];
+			my $source_end = $source_start + $range;
+
+			# how does input range fit?
+			my $map_shift = $dest->[0] - $source_start;
+			my ($seg_start, $seg_end);
+
+			if($start >= $source_start && $end <= $source_end) { #input range fits
+				$seg_start = $start;
+				$seg_end = $end;
+				push @return_segments, [($seg_start + $map_shift, $seg_end + $map_shift)];
+				$is_sifting = FALSE;
+			} elsif ($start < $source_start) { #passthru condition
+				 # say "\tpassthru: $start; $source_start";
+				$seg_start = $start;
+				$seg_end = $end >= $source_start ? $source_start - 1 : $end;
+				$start = $source_start;
+				push @return_segments, [($seg_start, $seg_end)];
+				$is_sifting = $end >= $source_start;
+
+				# say "\tinput range ($start, $end) fits $source_start to $source_end";
+			} elsif ($start >= $source_end) { # input should passthru
+				 # say "\tstart $start greater than source_end $source_end";
+				$seg_start = $start;
+				$seg_end = $end;
+				push @return_segments, [($seg_start, $seg_end)];
+				$start = $seg_end + 1;
+
+				# say "$debug: start:$start, end:$end, index:$map_low_index, source:$source_start, $source_end";
+				$map_low_index++;
+			} elsif ($start >= $source_start && $end > $source_end) { # input range doesn't fit
+				 # say "\tinput range ($start, $end) does not fit $source_start, $source_end";
+				$seg_start = $start;
+				$seg_end = $source_end;
+				$start = $seg_end + 1;
+				push @return_segments, [($seg_start + $map_shift, $seg_end + $map_shift)];
+				$map_low_index++;
+
+			} else {
+				die("illegal case");
+			}
+
+			if($start > $end) { $is_sifting = FALSE; }
+			if($map_low_index > $map_hi_index) { $is_sifting = FALSE; }
+		}
+	}
+	return @return_segments;
+}
+
+
+sub filter_range() {
+	my $input_ref = shift;
+
 }
 
 #Binary search
 sub get_match_or_lower() {
 	my $target = shift;
 	my $v = shift;
-	my $debug = shift;
+	my $return_index = shift;
 
 	my @values = @{$v};
 	my $values_length = @values;
 
 	return -1 if $target <= $values[0];
-	return $values[$values_length - 1] if $target >= $values[$values_length - 1];
+	if( $target >= $values[$values_length - 1]) {
+		return defined $return_index ? $values_length - 1 : $values[$values_length - 1];
+	}
+
 
 	my $i = 0;
 	my $j = $values_length;
@@ -255,26 +311,23 @@ sub get_match_or_lower() {
 		$mid = ($i + $j) / 2;
 		$mid = int($mid);
 
-		# say "matching $debug";
-		# say "\ti: $i, j: $j, mid: $mid; values:".join(',', @values);
-		# say "\t$target -> ".$values[$mid];
-		return $values[$mid] if $values[$mid] == $target;
-
+		if ($values[$mid] == $target) {
+			return defined $return_index ? $mid : $values[$mid];
+		}
 		if($target < $values[$mid]) {
 			if($mid > 0 && $target > $values[$mid - 1])	{
-				return $values[$mid -1];
+				return defined $return_index ? $mid -1 : $values[$mid - 1];
 			}
 			$j = $mid;
 		} else {
 			if( $mid < ($values_length - 1) && $target < $values[$mid + 1]) {
-				return $values[$mid];
+				return defined $return_index ? $mid : $values[$mid];
 			}
 
 			$i = ($mid + 1);
 		}
 	}
-
-	return $values[$mid];
+	return defined $return_index ? $mid : $values[$mid];
 }
 
 
@@ -292,8 +345,9 @@ sub get_destination_increment() {
 
 
 sub get_min() {
-	my $left = shift;
+	my $left_ref = shift;
 	my $right = shift;
+	my $left = min @$left_ref;
 
 	return $left if $right == 0;
 	return min($left, $right);

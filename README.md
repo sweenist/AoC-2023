@@ -249,6 +249,8 @@ Let's see what happens on a different machine...
 
 The approach above was pretty heavy handed. There's no need to store all the possible destination-source values. I changed the approach to only cache each recipe and let each seed be it's own input. to get the next component and interate. I often solve the via iteration. Anyway, part 1 works. Part 2 dies with "Out of Memory".
 
+ALso, the cognitive load on this one is high because of the number of mapings and the array of seed ranges. I had to leave a bunch of breadcrumbs for myself until I solved the breakdown.
+
 </details>
 
 <details>
