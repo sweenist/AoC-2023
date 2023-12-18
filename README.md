@@ -484,3 +484,23 @@ $$arr_ref[$#$arr_ref];
 
 Wanna keep your friends? Don't use perl...
 </details>
+
+<p style="margin:5px 14px">Day 10</p>
+
+<details>
+  <summary>Day 11</summary>
+  <h2>Expanding Space</h2>
+
+  I read this prompt before driving to Home Depot for some unfortunate DIY supplies. On the way there I thought:
+  > If I work the starfield array backwards and identify starless columns, I can splice each row with another '.' at the encountered index. Then, I'll go through each row and do the same.
+
+  This approach was fairly straightforward and easy to solve. (I should mention: array references in hashes bit me again. I'm surer I get it but...). And then along comes part two. There's a MILLION spans of spane for each starless line. Then I went to bed.
+
+  As I was brushing my teeth I thought:
+
+  > starfield expansion is merely a function 2d arrays. For every blank row/column, I previously increased the corresponding x or y by one. It was merely obfuscated by virtue of expanding the field, not padding numbers per empty dimension.
+
+  Pretty straight forward but prone to off by one errors. One needs to offset x/y by `expansion_rate -1` per encounter. I stored the grid indices where the empty row/columns lived and applied a modifier when the x/y compnent was > the identified row/column.
+
+  Part 2 solution runs for the same amount of time regardless of whther the expansion rate is 2 or 1,000,000 (0.130s)
+</details>
