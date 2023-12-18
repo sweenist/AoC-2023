@@ -20,8 +20,7 @@ open(my $file, "<", $inputfile) or die("unable to open file $inputfile");
 
 $output = solve($day, $part, $file);
 my $end_time = defined $benchmark ? Benchmark->new : 0;
-my $delta = timediff($end_time, $start_time);
-print_time($start_time, $end_time) if defined $benchmark;
+print_time($start_time, $end_time, $benchmark) if defined $benchmark;
 say "Answer: $output";
 
 close( $file);
@@ -37,7 +36,7 @@ sub usage {
 	say "For eaxample: `perl main.pl 1 2` would run day1 part_two routine";
 	say "    day: a number in range 1..25";
 	say "    part: either 1 or 2";
-	say "    benchmarking: any non-zero value";
+	say "    benchmarking: any non-zero value. 1 gives user time. >1 gives full message";
 	die;
 }
 
@@ -45,9 +44,16 @@ sub usage {
 sub print_time {
 	my $t0 = shift;
 	my $t1 = shift;
+	my $bench = shift;
+
+	my $delta = timediff($t1, $t0);
 
 	my $blah = timestr($delta, 'all', '5.3f');
+	if(defined $bench && $bench > 1) {
+		say $blah;
+		return;
+	}
 	my $usecs = (split / /, $blah)[4];
-	my $delta = $usecs =~ s/\(//g;
+	$usecs =~ s/\(//g;
 	say "Run time: $usecs secs";
 }
