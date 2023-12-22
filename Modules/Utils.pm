@@ -4,7 +4,7 @@ use warnings;
 
 use Exporter qw( import );
 our @ISA = qw( Exporter );
-our @EXPORT_OK = qw( lcm get_upper_bound intersect transpose flatten);
+our @EXPORT_OK = qw( lcm get_upper_bound intersect transpose flatten duplicates );
 
 use List::AllUtils qw( product any uniq );
 use feature qw( say );
@@ -124,6 +124,37 @@ sub flatten {
 	my $char_ref = shift;
 	my $line = join '',  @$char_ref;
 	return $line;
+}
+
+#---------------------------------------------------------------------------
+
+
+sub duplicates {
+	my $array_ref = shift;
+	my $debug = shift;
+
+	my %samesies;
+	my %real_samesies;
+
+	for(@$array_ref) {
+		next unless $samesies{$_}++;
+		$real_samesies{$_}++;
+	}
+	my @return = keys %real_samesies;
+
+	if(defined $debug) {
+
+		# my @a = keys %samesies;
+		my @b = keys %real_samesies;
+
+		# for(@a) {say "same: $_: ".$samesies{$_};}
+
+		for(@b) {
+			my $v = $real_samesies{$_};
+			say "truly: $_: $v" if $v > 2;
+		}
+	}
+	return @return;
 }
 
 1;

@@ -550,3 +550,19 @@ There are other phenomena about these data sets but I think I should attempt to 
 So... much to my shame, I couldn't make a smart and perhaps efficient solution happen. At this point, I'm about to call it a year for AoC. I want to dig back into ASM6507 for Atari. So I effectively made a combo of patterns and doubled my inputs for each `?`. The smart solution is within my grasp... maybe a good night's sleep will do the trick.
  
 </details>
+
+<details>
+  <summary>Day 13</summary>
+
+  <h2>Watch out for the lava!</h2>
+
+  So there are hidden mirrors in lava fields... found only by identifying reflections in a grid of ash and rock horizontally or vertically. A part of my brain is nagging to looking into a Matrix type, but if I did, I'd only be looking for how to rotate it at center and check the new "rows" for symmetry.
+
+  <h3>I got a linter!</h3>
+  
+  I installed the Perl Toolbox extensions from VS Marketplace. I now get coloered squiggles when I make mistakes! I should have sought this out sooner.
+
+  <h3>Overthinking</h3>
+  Really, the way to solve the problem is to identify matching rows and columns adjacent to each other and spread outwards. It's really not a hard problem to solve but I somehow got stuck overthinking compensating for edges. Also, merely looking for the first instance of a duplicate vs a last and taking the diff isn't sufficient. The `first_index` and `last_index` List::AllUtils helpers aren't the right tools because of dupes.
+  
+</details>
