@@ -485,7 +485,15 @@ $$arr_ref[$#$arr_ref];
 Wanna keep your friends? Don't use perl...
 </details>
 
-<p style="margin:5px 14px">Day 10</p>
+<details>
+  <summary>Day 10</summary>
+
+I've approached this problem or something like it handling joystick presses in a maze game I made ages ago. I thought of things in terms of North, South, East and West. I did cheat it a little bit because I made a purely recursive method and it was single threaded. Each visited coordinate got stored in a hash. If a coordinate was already visited, break the program. Since I was incrementing a value with each position, When I got back to the first point after the start, I added one and divided by two to get my halfway point. I think I tried to mess with threads, I'd run into different problems. 
+
+Handling position changes was done in a giant `given...when` processor.
+
+I don't care enough to solve part 2 at this point though I may revisit it. The problem of finding interior tiles sounds a little interesting though complex.
+</details>
 
 <details>
   <summary>Day 11</summary>

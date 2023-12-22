@@ -15,8 +15,7 @@ use Modules::Day6;
 use Modules::Day7;
 use Modules::Day8;
 use Modules::Day9;
-
-# use Modules::Day10;
+use Modules::Day10;
 use Modules::Day11;
 
 # use Modules::Day12;
