@@ -512,3 +512,41 @@ I don't care enough to solve part 2 at this point though I may revisit it. The p
 
   Part 2 solution runs for the same amount of time regardless of whther the expansion rate is 2 or 1,000,000 (0.130s)
 </details>
+
+<details>
+  <summary>Day 12</summary>
+
+It's a game of find the possible arrangments of broken springs given some data.
+I spent some time downstairs on the whiteboard with raw forms of mapping possibilities. I yreated a contiguous set as one unit for the sake of identifying unique mappings. There seems to be a relationship between the width of a set of plots and the delta of the numbers to work with. Each # must have at least one space between it and the next #. The possibilities seem to be a summation of 1..n where n is the delta between the broken parts and spaces with the width of the field.
+
+eg: ??????? 1,1,1 is 7 - 5 (# plus space, or comma, in this case) plus 1 (I dunno where that comes from, maybe default case?) which should be sum of 
+
+```perl
+(1**2 + 1)//2 + (2**2 + 2)//2 + (3**2 + 3)//2
+
+2//2 + 6//2 + 12//2
+
+1 + 3 + 6 = 10
+```
+
+Which gives the following possibilities:
+
+```perl
+ 1 ..#.#.#
+ 2 .#..#.#
+ 3 .#.#..#
+ 4 .#.#.#.
+ 5 #...#.#
+ 6 #..#..#
+ 7 #..#.#.
+ 8 #.#...#
+ 9 #.#..#.
+10 #.#.#..
+```
+
+There are other phenomena about these data sets but I think I should attempt to solve these sets with what I've discovered so far. Known good or bad springs will pose a special problem.
+
+<h3>Et tu, Brute Force?</h3>
+So... much to my shame, I couldn't make a smart and perhaps efficient solution happen. At this point, I'm about to call it a year for AoC. I want to dig back into ASM6507 for Atari. So I effectively made a combo of patterns and doubled my inputs for each `?`. The smart solution is within my grasp... maybe a good night's sleep will do the trick.
+ 
+</details>
