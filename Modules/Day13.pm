@@ -24,8 +24,6 @@ sub part_one {
 	while(my $line = <DATA>) {
 		chomp($line);
 		if($line) {
-
-			# say "$d: $line";
 			my @num_rep = split(//, ($line =~ s/#/2/gr =~ s/\./1/gr));
 			push @lava_maps, [@num_rep];
 		} else {
@@ -61,14 +59,12 @@ sub process_matrix() {
 
 	@rows = flatten(\@rows);
 	my @columns = get_columns($matrix_ref);
-	my $width = @columns;
 
 	comparator(\@columns);
 
 	my $row_mirror = symmetrize(\@rows, "row");
 	my $column_mirror = symmetrize(\@columns, "column");
 
-	# say "w x h: $width x $height";
 	say "  row sym: $row_mirror; col_sym: $column_mirror\n";
 
 	if($row_mirror > $column_mirror) {return $row_mirror * 100; }
@@ -79,12 +75,7 @@ sub process_matrix() {
 sub get_columns() {
 
 	# Takes an Array of arrays and returns its rotational transform (fakely)
-	# A,B,C,D
-	# becomes
-	# A
-	# B
-	# C
-	# D
+	# akin to zip in python. zip in AllUtils doesn't quite do it
 
 	my $matrix_ref = shift;
 
