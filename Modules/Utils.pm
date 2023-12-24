@@ -4,7 +4,7 @@ use warnings;
 
 use Exporter qw( import );
 our @ISA = qw( Exporter );
-our @EXPORT_OK = qw( lcm get_upper_bound intersect transpose );
+our @EXPORT_OK = qw( lcm get_upper_bound intersect transpose flatten);
 
 use List::AllUtils qw( product any uniq );
 use feature qw( say );
@@ -86,14 +86,14 @@ sub intersect {
 #---------------------------------------------------------------------------
 
 
-sub transpose() {
+sub transpose {
 
 	# Takes an Array of arrays and returns its rotational transform (fakely)
 	# akin to zip in python. zip in AllUtils doesn't quite do it
 
 	my $matrix_ref = shift;
 
-	my @return = ();
+	my @return;
 
 	#seed the return
 	my @top_row = @{@$matrix_ref[0]};
@@ -113,6 +113,17 @@ sub transpose() {
 	}
 
 	return \@return;
+}
+
+#---------------------------------------------------------------------------
+
+
+sub flatten {
+
+	#takes a character array and returns concatenated chars as a string
+	my $char_ref = shift;
+	my $line = join '',  @$char_ref;
+	return $line;
 }
 
 1;
