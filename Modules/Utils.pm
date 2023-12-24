@@ -4,7 +4,7 @@ use warnings;
 
 use Exporter qw( import );
 our @ISA = qw( Exporter );
-our @EXPORT_OK = qw( lcm get_upper_bound intersect );
+our @EXPORT_OK = qw( lcm get_upper_bound intersect transpose );
 
 use List::AllUtils qw( product any uniq );
 use feature qw( say );
@@ -81,6 +81,38 @@ sub intersect {
 
 	++$intersect{$_} for @first;
 	return grep {--$intersect{$_} >= 0} @second;
+}
+
+#---------------------------------------------------------------------------
+
+
+sub transpose() {
+
+	# Takes an Array of arrays and returns its rotational transform (fakely)
+	# akin to zip in python. zip in AllUtils doesn't quite do it
+
+	my $matrix_ref = shift;
+
+	my @return = ();
+
+	#seed the return
+	my @top_row = @{@$matrix_ref[0]};
+	for (@top_row) {
+		push @return, [ $_ ];
+	}
+
+	my $height = @{$matrix_ref};
+
+	for(1..$height - 1) {
+		my @row = @{@$matrix_ref[$_]};
+		my $i = 0;
+		for my $v (@row) {
+			push @{$return[$i]}, $v;
+			$i++;
+		}
+	}
+
+	return \@return;
 }
 
 1;
